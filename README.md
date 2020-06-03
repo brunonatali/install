@@ -18,7 +18,7 @@ Note. Not supported on Windows.
 
 ### Folder structure
 Prepare the folder structure as shown below:
-
+```shell
 +-- installation
 |   +-- install.php
 |   +-- install-instructions.json
@@ -27,6 +27,7 @@ Prepare the folder structure as shown below:
 +-- src
 |   +-- YourClass.php
 +-- composer.json
+```
 
 Note. If you are unsure how to create your 'my_program_executable' go to `Executable program`.
 
@@ -63,7 +64,7 @@ $myApp->install();
 $ php vendor/myname/appname/installation/install.php
 ```
 
-This will make the contents of the "pbin" folder become executable, as well as create a service on the system with the name "My1stProgram" that will execute the file "my_program_executable". Note that a symlink is created in "/ usr / sbin", that way you can run the application by typing in the terminal:
+This will make the contents of the "pbin" folder become executable, as well as create a service on the system with the name "My1stProgram" that will execute the file "my_program_executable". Note that a symlink is created in "/usr/sbin", that way you can run the application by typing in the terminal:
 ```shell
 $ my_program_executable
 ```
@@ -81,7 +82,7 @@ The simplest and most direct way to perform the installation of all applications
 $ sudo php -r "require 'vendor/autoload.php'; \BrunoNatali\Install\Factory::installAll();"
 ```
 
-Note. Note the need to run as root, as it will interact with systemd and create / update processes within the system.
+Note. The need to run as root, as it will interact with systemd and create / update processes within the system.
 
 ## Executable program
 An executable program considered for this tool basically contains:
