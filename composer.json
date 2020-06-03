@@ -1,0 +1,30 @@
+{
+    "name": "brunonatali/install",
+    "description": "Provide installation capability to a repository.",
+    "license": "MIT",
+	"authors": [
+	  {
+		"name": "Bruno Natali",
+		"email": "b010010010n@gmail.com"
+	  }
+	],
+    "require": {
+			"php": ">=7.3",
+			"brunonatali/tools": "dev-master"
+	},
+	"require-dev": {
+		"phpunit/phpunit": "^9"
+	},
+	"autoload": {
+		"psr-4": {
+			"BrunoNatali\\Install\\": "src"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"BrunoNatali\\Tests\\Install\\": "tests/"
+		}
+	},
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
