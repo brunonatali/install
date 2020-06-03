@@ -83,7 +83,7 @@ class Factory implements InstallInterface
             if (!\file_exists($instructions))
                 throw new \Exception("Instructions file not found in: " . $instructions, self::INSTALL_INS_ERROR);
                  
-            $fileContent = \json_decode(\file_get_contents($instructionsFile), true);
+            $fileContent = \json_decode(\file_get_contents($instructions), true);
             if (!\is_array($fileContent))
                 throw new \Exception("Instructions file in wrong format", self::INSTALL_INS_WRONG_FORMAT);
 
@@ -171,6 +171,7 @@ class Factory implements InstallInterface
                     throw new \Exception("Config error in service index $key", self::INSTALL_SERVICE_CONFIG_ERROR);
 
                 $serviceName = $service['name'] . '.service';
+                $this->outSystem->stdout("\t- $serviceName", OutSystem::LEVEL_NOTICE);
 
                 $out = [];
                 $result = 0;
@@ -210,7 +211,6 @@ class Factory implements InstallInterface
                     $this->run('systemctl enable ' . $serviceName, $out) !== 0) 
                         throw new \Exception("Error while creating service '$serviceName'", 1);
 
-                $this->outSystem->stdout("\t- $serviceName", OutSystem::LEVEL_NOTICE);
                 $result = 'Done.';
             }
         }
@@ -228,27 +228,9 @@ class Factory implements InstallInterface
         ];
         OutSystem::dstdout("Searching installable apps in " . \realpath($dir), $stdoutConfig);
 
-        $appsToInstall = [];
-
-        $getDircontent($dir); // Build list
-
-        if (($count = count($appsToInstall)) === 0) {
-            OutSystem::dstdout("No one app to install", $stdoutConfig);
-            return false;
-        }
-
-        OutSystem::dstdout("Found $count apps", $stdoutConfig);
-
-        foreach ($appsToInstall as $app) {
-            $myApp = new Factory([
-                'dir' => $app
-            ] + $stdoutConfig);
-
-            $myApp->install();
-        }
-
-        return true;
-
+        /**
+         * Anonymous function to do a recursive search in vendor root folder
+        */
         $getDirContent = function ($dir, $found = false) use (&$getDirContent, &$appsToInstall) {
             foreach (\array_diff(\scandir($dir), ['..', '.']) as  $item) {
                 $path = realpath("$dir/$item");
@@ -272,13 +254,33 @@ class Factory implements InstallInterface
                 }
             }
         };
+
+        $appsToInstall = [];
+        $getDirContent($dir); // Build list
+
+        if (($count = count($appsToInstall)) === 0) {
+            OutSystem::dstdout("No one app to install", $stdoutConfig);
+            return false;
+        }
+
+        OutSystem::dstdout("Found $count apps", $stdoutConfig);
+
+        foreach ($appsToInstall as $app) {
+            $myApp = new Factory([
+                'dir' => $app
+            ] + $stdoutConfig);
+
+            $myApp->install();
+        }
+
+        return true;
     }
 
     private function run(string $cmd, array &$out): int
     {
         $out = [];
         $result = 0;
-        \exec($cmd, $out, $result);
+        @\exec($cmd, $out, $result);
     
         return $result;
     }
