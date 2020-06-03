@@ -4,7 +4,7 @@ namespace BrunoNatali\Install;
 
 use BrunoNatali\Tools\OutSystem;
 
-class Install implements InstallInterface
+class Factory implements InstallInterface
 {
     private $dir;
     private $pbin;
@@ -216,6 +216,62 @@ class Install implements InstallInterface
         }
 
         $this->outSystem->stdout($result, OutSystem::LEVEL_NOTICE);
+    }
+
+    public static function installAll(string $dir = null): bool
+    {
+        if ($dir === null)
+            $dir = __DIR__ . '/../../../'; // Install/brunonatali/vendor
+
+        $stdoutConfig = [
+            'outSystemName' => 'InstallALL'
+        ];
+        OutSystem::dstdout("Searching installable apps in " . \realpath($dir), $stdoutConfig);
+
+        $appsToInstall = [];
+
+        $getDircontent($dir); // Build list
+
+        if (($count = count($appsToInstall)) === 0) {
+            OutSystem::dstdout("No one app to install", $stdoutConfig);
+            return false;
+        }
+
+        OutSystem::dstdout("Found $count apps", $stdoutConfig);
+
+        foreach ($appsToInstall as $app) {
+            $myApp = new Factory([
+                'dir' => $app
+            ] + $stdoutConfig);
+
+            $myApp->install();
+        }
+
+        return true;
+
+        $getDirContent = function ($dir, $found = false) use (&$getDirContent, &$appsToInstall) {
+            foreach (\array_diff(\scandir($dir), ['..', '.']) as  $item) {
+                $path = realpath("$dir/$item");
+                
+                if ($found) {
+
+                    if ($item === 'install-instructions.json')
+                        return true;
+
+                } else {
+                    if (is_dir($path)) {
+                        if ($item === 'installation') {
+                            
+                            if ($getDirContent($path, true) === true);
+                                $appsToInstall[] = $path;
+
+                        } else {
+                            $getDirContent($path);
+                        }
+                    } 
+                }
+            }
+        };
     }
 
     private function run(string $cmd, array &$out): int
