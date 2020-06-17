@@ -26,6 +26,8 @@ Prepare the folder structure as shown below:
 |   +-- my_program_executable
 +-- src
 |   +-- YourClass.php
++-- post-install
+|   +-- myScript.sh
 +-- composer.json
 ```
 
@@ -47,7 +49,8 @@ A common use is the individual installation of the application, for that, consid
             "name" : "My1stProgram",
             "bin" : "my_program_executable"
         }
-    ]
+    ],
+    "post-installation" : "/post-install/myScript.sh"
 }
 ```
 - Let's add a script for auto installation "installation / install.php":
@@ -64,7 +67,9 @@ $myApp->install();
 $ php vendor/myname/appname/installation/install.php
 ```
 
-This will make the contents of the "pbin" folder become executable, as well as create a service on the system with the name "My1stProgram" that will execute the file "my_program_executable". Note that a symlink is created in "/usr/sbin", that way you can run the application by typing in the terminal:
+This will make the contents of the "pbin" folder become executable, as well as create a service on the system with the name "My1stProgram" that will execute the file "my_program_executable". 
+At the end will call script myScript.sh (under /post-install), to do some adjusts that you need, like call other aplication, change some file attribute or remove.
+Note that a symlink is created in "/usr/sbin", that way you can run the application by typing in the terminal:
 ```shell
 $ my_program_executable
 ```

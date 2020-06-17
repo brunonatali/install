@@ -13,7 +13,8 @@ interface InstallInterface
     const INSTALL_SYS_BIN_WRONG_FORMAT = 0x17; // "'sys-bin-files' must be array"
     const INSTALL_SYMLINK_ERROR = 0x18; // "Error while installing '$bin': " . (\is_array($out) ? implode(PHP_EOL, $out) : $out)
     const INSTALL_SERVICE_WRONG_FORMAT = 0x19; // "'service' must be array"
-    const INSTALL_SERVICE_CONFIG_ERROR = 0x20; // "Config error in service index $key"
+    const INSTALL_SERVICE_CONFIG_ERROR = 0x1A; // "Config error in service index $key"
+    const INSTALL_POST_INST_FILE_ERROR = 0x1B; // "Post installation file not exist"
 
     public function setDir(string $dir);
 
