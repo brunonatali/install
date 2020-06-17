@@ -4,10 +4,10 @@ Provide installation capability to a repository.
 
 **Table of Contents**
 * [Before start](#first)
-    * [Folder structure](#folderstructure)
+    * [Folder structure](#folder-structure)
 * [Quickstart example](#quickstart-example)
-    * [Individual](#quickIndividual)
-    * [All apps](#quickGlobal)
+    * [Individual](#individual)
+    * [All apps](#a0ll-apps)
 * [Executable program](#executable-program)
 * [Install](#install)
 * [License](#license)
