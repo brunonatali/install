@@ -7,7 +7,7 @@ Provide installation capability to a repository.
     * [Folder structure](#folder-structure)
 * [Quickstart example](#quickstart-example)
     * [Individual](#individual)
-    * [All apps](#a0ll-apps)
+    * [All apps](#all-apps)
 * [Executable program](#executable-program)
 * [Install](#install)
 * [License](#license)
