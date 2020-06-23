@@ -224,7 +224,7 @@ class Factory implements InstallInterface
                 throw new \Exception('Post installation file not exist', self::INSTALL_POST_INST_FILE_ERROR);
         
             \chmod($this->dir . $this->instructions['post-installation'], 0755); // Make script executable
-            \passthru($this->dir . $this->instructions['post-installation']); 
+            \passthru('export INSTALL_DIR=' . $this->dir . ' && ' . $this->dir . $this->instructions['post-installation']); 
         }
 
         $this->outSystem->stdout($result, OutSystem::LEVEL_NOTICE);
