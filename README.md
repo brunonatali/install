@@ -32,7 +32,7 @@ Prepare the folder structure as shown below:
 +-- composer.json
 ```
 
-Note. If you are unsure how to create your 'my_program_executable' go to `Executable program`.
+Note. If you are unsure how to create your 'my_program_executable' go to [Executable program](#executable-program).
 
 ## Quickstart example
 ### Individual
