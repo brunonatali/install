@@ -113,6 +113,8 @@ To help localization, an environment variable 'INSTALL_DIR' has been added.
 #!/bin/bash
 
 echo "Installing from: $INSTALL_DIR";
+
+$ Installing from: /opt/myapp/vendor/vendor-name/rep-name/installation
 ```
 
 ## Install
