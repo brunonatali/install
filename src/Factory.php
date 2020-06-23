@@ -105,12 +105,35 @@ class Factory implements InstallInterface
         return \basename(\getcwd()); // Get APP dir name
     }
 
-    public function install()
+    public function install(array $baseInstructions = [])
     {
         $result = 'Nothing to do, check your configuration.';
 
         if ($this->appName === null)
             $this->appName = $this->getAppName();
+
+        /**
+         * Check required apps before start installation
+        */
+        if (isset($this->instructions['require'])) {
+            if (!is_array($this->instructions['require']))
+                throw new \Exception("Require must be array", self::INSTALL_INS_REQUIRE_ERROR);
+
+            foreach ($this->instructions['require'] as $require) {
+                $require = \trim($require);
+
+                if (!isset($baseInstructions['require-installed']) ||
+                    !isset($baseInstructions['require-installed'][$require])) {
+                        $this->outSystem->stdout(
+                            'Aborting ' . $this->appName . " instalation, required $require not installed.", 
+                            OutSystem::LEVEL_NOTICE
+                        );
+
+                        return $require;
+                    }
+            }
+                
+        }
 
         $this->outSystem->stdout('Starting ' . $this->appName . ' instalation', OutSystem::LEVEL_NOTICE);
         
@@ -223,11 +246,15 @@ class Factory implements InstallInterface
                 !\file_exists($this->dir . $this->instructions['post-installation']))
                 throw new \Exception('Post installation file not exist', self::INSTALL_POST_INST_FILE_ERROR);
         
+            $this->outSystem->stdout('Running post script: ' . $this->instructions['post-installation'], OutSystem::LEVEL_NOTICE);
+
             \chmod($this->dir . $this->instructions['post-installation'], 0755); // Make script executable
             \passthru('export INSTALL_DIR=' . $this->dir . ' && ' . $this->dir . $this->instructions['post-installation']); 
         }
 
         $this->outSystem->stdout($result, OutSystem::LEVEL_NOTICE);
+
+        return true;
     }
 
     public static function installAll(string $dir = null): bool
@@ -244,7 +271,7 @@ class Factory implements InstallInterface
          * Anonymous function to do a recursive search in vendor root folder
         */
         $getDirContent = function ($dir, $found = false) use (&$getDirContent, &$appsToInstall) {
-            foreach (\array_diff(\scandir($dir), ['..', '.']) as  $item) {
+            foreach (\array_diff(\scandir($dir), ['..', '.']) as $item) {
                 $path = realpath("$dir/$item");
                 
                 if ($found) {
@@ -277,12 +304,35 @@ class Factory implements InstallInterface
 
         OutSystem::dstdout("Found $count apps", $stdoutConfig);
 
-        foreach ($appsToInstall as $app) {
-            $myApp = new Factory([
-                'dir' => $app
-            ] + $stdoutConfig);
+        $installAll = function (&$appsToInstall, &$installedApps, $stdoutConfig)
+        {
+            foreach ($appsToInstall as $i => $app) {
+                $myApp = new Factory([
+                    'dir' => $app
+                ] + $stdoutConfig);
+    
+                $result = $myApp->install($installedApps);
+                if ($result === true) {
+                    $installedApps['require-installed'][ $myApp->appName ] = $myApp->appName;
+                    unset($appsToInstall[$i]);
+                }
+            }
 
-            $myApp->install();
+            return count($appsToInstall);
+        };
+
+        $installedApps = [
+            'require-installed' => []
+        ];
+        $last = count($appsToInstall);
+        while (($rest = $installAll($appsToInstall, $installedApps, $stdoutConfig))) {
+            if ($last !== $rest) {
+                OutSystem::dstdout("Retry installation of: $rest", $stdoutConfig);
+                $last = $rest;
+            } else {
+                OutSystem::dstdout("Critical error, could not install: $rest", $stdoutConfig);
+                break;
+            }
         }
 
         return true;

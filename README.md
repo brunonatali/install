@@ -10,11 +10,12 @@ Provide installation capability to a repository.
     * [All apps](#all-apps)
 * [Executable program](#executable-program) 
 * [Post install script](#post-install-script)
+* [Require app](#require-app)
 * [Install](#install)
 * [License](#license)
 
 ## Before start
-Before you begin, consider reviewing your code and understanding that this is a tool for automating the installation of an application made in PHP to run on the CLI or as a service in a Linux environment.
+Before you begin, consider reviewing your code and understanding that this is a tool for automating the installation of an application made in PHP to run on the CLI or as a service in a Linux environment.  
 Note. Not supported on Windows.
 
 ### Folder structure
@@ -51,6 +52,10 @@ A common use is the individual installation of the application, for that, consid
             "bin" : "my_program_executable"
         }
     ],
+    "require" : [
+        "program1",
+        "program2"
+    ],
     "post-installation" : "/../post-install/myScript.sh"
 }
 ```
@@ -68,15 +73,16 @@ $myApp->install();
 $ php vendor/myname/appname/installation/install.php
 ```
 
-This will make the contents of the "pbin" folder become executable, as well as create a service on the system with the name "My1stProgram" that will execute the file "my_program_executable". 
-At the end will call script myScript.sh (under /post-install), to do some adjusts that you need, like call other aplication, change some file attribute or remove. [Learn more](#post-install-script)
+This will make the contents of the "pbin" folder become executable, as well as create a service on the system with the name "My1stProgram" that will execute the file "my_program_executable".  
+At the end will call script myScript.sh (under /post-install), to do some adjusts that you need, like call other aplication, change some file attribute or remove. [Learn more](#post-install-script)  
+An "require" is a array that tell which apps your app depends.  
 Note that a symlink is created in "/usr/sbin", that way you can run the application by typing in the terminal:
 ```shell
 $ my_program_executable
 ```
 
 ### All apps
-In this example, it is assumed that the folder structure shown in `Folder structure` and at least the configuration file "install-instructions.json" is created within all the applications you intend to install.
+In this example, it is assumed that the folder structure shown in `Folder structure` and at least the configuration file "install-instructions.json" is created within all the applications you intend to install.  
 
 Within the Factory class there is a static function to make the installation of several applications very easy:
 ```php
@@ -107,7 +113,7 @@ $myService->start();
 ```
 
 ## Post install script
-You can create a bash script to run after installation. For now, this script could do anything.
+You can create a bash script to run after installation. For now, this script could do anything.  
 To help localization, an environment variable 'INSTALL_DIR' has been added.
 ```shell
 #!/bin/bash
@@ -116,6 +122,53 @@ echo "Installing from: $INSTALL_DIR";
 
 $ Installing from: /opt/myapp/vendor/vendor-name/rep-name/installation
 ```
+
+## Require app
+With "require" set in your config.json you could set which app your application depends.  
+Ex. If you have application called "myCar", you can set "require", like this:  
+```json
+{
+    "require" : [
+        "engine",
+        "wheelsNtires"
+    ]
+}
+```
+With this, Install whill install "engine" and "wheelsNtires" before install "myCar"  
+Note 1. This will be handled automatically when called from \BrunoNatali\Install\Factory::[installAll()](#all-apps).  
+  
+To handle manually, an 'require-installed' must be passed to [install()](#individual)
+```php
+/**
+ * engine.php
+*/
+use BrunoNatali\Install\Factory;
+$myApp = new Factory( ["dir" => __DIR__] );
+$myApp->install();
+```
+```php
+/**
+ * wheelsNtires.php
+*/
+use BrunoNatali\Install\Factory;
+$myApp = new Factory( ["dir" => __DIR__] );
+$myApp->install();
+```
+```php
+/**
+ * car.php
+*/
+use BrunoNatali\Install\Factory;
+$myApp = new Factory( ["dir" => __DIR__] );
+$myApp->install( array(
+    'require-installed' => array(
+        "engine" => '', // See note 2
+        "wheelsNtires" => true,
+        "stuff" => 'ok'
+    )
+));
+```
+Note 2. In the above example, don't matther what is the value of require-installed item, just need to be registered as a key.
 
 ## Install
 

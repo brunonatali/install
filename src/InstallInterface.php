@@ -15,6 +15,7 @@ interface InstallInterface
     const INSTALL_SERVICE_WRONG_FORMAT = 0x19; // "'service' must be array"
     const INSTALL_SERVICE_CONFIG_ERROR = 0x1A; // "Config error in service index $key"
     const INSTALL_POST_INST_FILE_ERROR = 0x1B; // "Post installation file not exist"
+    const INSTALL_INS_REQUIRE_ERROR = 0x1C; // "Require must be array"
 
     public function setDir(string $dir);
 
