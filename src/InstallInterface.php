@@ -25,5 +25,5 @@ interface InstallInterface
 
     public function getAppName(): string;
 
-    public function install();
+    public function install(array $baseInstructions = []);
 }

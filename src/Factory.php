@@ -257,7 +257,7 @@ class Factory implements InstallInterface
         return true;
     }
 
-    public static function installAll(string $dir = null): bool
+    public static function installAll(string $dir = null, array $remove = []): bool
     {
         if ($dir === null)
             $dir = __DIR__ . '/../../../'; // Install/brunonatali/vendor
@@ -267,13 +267,19 @@ class Factory implements InstallInterface
         ];
         OutSystem::dstdout("Searching installable apps in " . \realpath($dir), $stdoutConfig);
 
+        $installedApps = [
+            'require-installed' => []
+        ];
+
         /**
          * Anonymous function to do a recursive search in vendor root folder
         */
-        $getDirContent = function ($dir, $found = false) use (&$getDirContent, &$appsToInstall) {
+        $getDirContent = function ($dir, $found = false) use (
+            &$getDirContent, &$appsToInstall, &$installedApps, $remove, $stdoutConfig
+            ) {
             foreach (\array_diff(\scandir($dir), ['..', '.']) as $item) {
                 $path = realpath("$dir/$item");
-                
+
                 if ($found) {
 
                     if ($item === 'install-instructions.json')
@@ -283,6 +289,18 @@ class Factory implements InstallInterface
                     if (is_dir($path)) {
                         if ($item === 'installation') {
                             
+                            if (\array_search(($rmAppName = \basename($dir)), $remove) !== false) {
+                                OutSystem::dstdout(
+                                    'Aborting ' . $rmAppName . ' intallation. Registered to not install.', 
+                                    $stdoutConfig
+                                );
+
+                                // Add as app installed to not block apps that need this
+                                $installedApps['require-installed'][ $rmAppName ] = $rmAppName;
+
+                                return;
+                            }
+
                             if ($getDirContent($path, true) === true);
                                 $appsToInstall[] = $path;
 
@@ -304,13 +322,13 @@ class Factory implements InstallInterface
 
         OutSystem::dstdout("Found $count apps", $stdoutConfig);
 
-        $installAll = function (&$appsToInstall, &$installedApps, $stdoutConfig)
+        $installAll = function (&$appsToInstall, &$installedApps) use ($stdoutConfig)
         {
             foreach ($appsToInstall as $i => $app) {
                 $myApp = new Factory([
                     'dir' => $app
                 ] + $stdoutConfig);
-    
+
                 $result = $myApp->install($installedApps);
                 if ($result === true) {
                     $installedApps['require-installed'][ $myApp->appName ] = $myApp->appName;
@@ -321,11 +339,9 @@ class Factory implements InstallInterface
             return count($appsToInstall);
         };
 
-        $installedApps = [
-            'require-installed' => []
-        ];
         $last = count($appsToInstall);
-        while (($rest = $installAll($appsToInstall, $installedApps, $stdoutConfig))) {
+        
+        while (($rest = $installAll($appsToInstall, $installedApps))) {
             if ($last !== $rest) {
                 OutSystem::dstdout("Retry installation of: $rest", $stdoutConfig);
                 $last = $rest;
