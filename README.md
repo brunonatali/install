@@ -187,7 +187,7 @@ $myApp->install( array(
     )
 ));
 ```
-Note 2. In the above example, don't matther what is the value of require-installed item, just need to be registered as a key.
+Note 2. In the above example, don't matther what is the value of require-installed item (*EXCEPT FOR 'force' that is reserved internally), just need to be registered as a key.
 
 ## Install
 
