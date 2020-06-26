@@ -134,8 +134,16 @@ class Factory implements InstallInterface
             }
                 
         }
+        
+        if (isset($baseInstructions['require-installed'][ $this->appName ]) && 
+            $baseInstructions['require-installed'][ $this->appName ] === 'basic') {
+            $this->outSystem->stdout('Starting ' . $this->appName . ' BASIC instalation', OutSystem::LEVEL_NOTICE);
+            $basicInstall = true;
+        } else {
+            $this->outSystem->stdout('Starting ' . $this->appName . ' instalation', OutSystem::LEVEL_NOTICE);
+            $basicInstall = false;
+        }
 
-        $this->outSystem->stdout('Starting ' . $this->appName . ' instalation', OutSystem::LEVEL_NOTICE);
         
         /**
          * Make all files in pbin folder executable 
@@ -177,6 +185,11 @@ class Factory implements InstallInterface
                 $this->outSystem->stdout("\t- $bin", OutSystem::LEVEL_NOTICE);
                 $result = 'Done.';
             }
+        }
+        
+        if ($basicInstall) { // End script due to a basic installation
+            $this->outSystem->stdout($result, OutSystem::LEVEL_NOTICE);
+            return true;
         }
 
         /**
@@ -270,7 +283,7 @@ class Factory implements InstallInterface
         $installedApps = [
             'require-installed' => []
         ];
-
+        
         /**
          * Anonymous function to do a recursive search in vendor root folder
         */
@@ -289,16 +302,22 @@ class Factory implements InstallInterface
                     if (is_dir($path)) {
                         if ($item === 'installation') {
                             
-                            if (\array_search(($rmAppName = \basename($dir)), $remove) !== false) {
+                            $rmAppName = \basename($dir);
+                            if (isset($remove[ $rmAppName ])) {
+                                if ($remove[ $rmAppName ] === 'force') {
+                                    // Add as app installed to not block apps that need this
+                                    $installedApps['require-installed'][ $rmAppName ] = 'not-install';
+                                    $msg = 'Aborting ' . $rmAppName . ' intallation. Registered to not install.';
+                                } else {
+                                    // App will be installed without critical content, like service
+                                    $installedApps['require-installed'][ $rmAppName ] = 'basic';
+                                    $msg = 'Basic installation registered to ' . $rmAppName ;
+                                }
+
                                 OutSystem::dstdout(
-                                    'Aborting ' . $rmAppName . ' intallation. Registered to not install.', 
+                                    $msg, 
                                     $stdoutConfig
                                 );
-
-                                // Add as app installed to not block apps that need this
-                                $installedApps['require-installed'][ $rmAppName ] = $rmAppName;
-
-                                return;
                             }
 
                             if ($getDirContent($path, true) === true);

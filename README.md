@@ -94,6 +94,25 @@ The simplest and most direct way to perform the installation of all applications
 $ sudo php -r "require 'vendor/autoload.php'; \BrunoNatali\Install\Factory::installAll();"
 ```
 
+Is possible to skip some app installation (partially or entirely).  
+To do this, you need to pass an array with app name in key, as follows: 
+```php
+/**
+ * Installation will be made in basic mode, no services or post scripts 
+ *  are done in this mode
+*/
+\BrunoNatali\Install\Factory::installAll( null, array(
+    'appToNotInstall' => true  // Don`t metter the value
+) );
+
+/**
+ * Installation will be entirely skipped
+*/
+\BrunoNatali\Install\Factory::installAll( null, array(
+    'appToNotInstall' => 'force'  // Set value to 'force'
+) );
+```
+
 Note. The need to run as root, as it will interact with systemd and create / update processes within the system.
 
 ## Executable program
