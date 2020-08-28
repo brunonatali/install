@@ -10,7 +10,7 @@ Provide installation capability to a repository.
     * [All apps](#all-apps)
 * [Executable program](#executable-program) 
 * [Post install script](#post-install-script)
-* [Use pid file](#control-by-pid)
+* [Use pid file](#use-pid-file)
 * [Require app](#require-app)
 * [Install](#install)
 * [License](#license)
