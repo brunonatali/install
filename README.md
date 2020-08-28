@@ -10,6 +10,7 @@ Provide installation capability to a repository.
     * [All apps](#all-apps)
 * [Executable program](#executable-program) 
 * [Post install script](#post-install-script)
+* [Use pid file](#control-by-pid)
 * [Require app](#require-app)
 * [Install](#install)
 * [License](#license)
@@ -49,7 +50,8 @@ A common use is the individual installation of the application, for that, consid
     "service" : [
         {
             "name" : "My1stProgram",
-            "bin" : "my_program_executable"
+            "bin" : "my_program_executable",
+            "control-by-pid" : true
         }
     ],
     "require" : [
@@ -141,6 +143,20 @@ echo "Installing from: $INSTALL_DIR";
 
 $ Installing from: /opt/myapp/vendor/vendor-name/rep-name/installation
 ```
+
+## Use pid file
+Could be configured to use a pid file to control service. 
+For this, place an "control-by-pid" in service config:
+```json
+"service" : [
+        {
+            "name" : "MyApp",
+            "bin" : "my_app_executable",
+            "control-by-pid" : true
+        }
+    ]
+```
+An pid file is created in \var\run\MyApp.pid when start and removed when stops.
 
 ## Require app
 With "require" set in your config.json you could set which app your application depends.  

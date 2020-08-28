@@ -10,7 +10,7 @@
 	],
     "require": {
 			"php": ">=7.3",
-			"brunonatali/tools": ">=0.3"
+			"brunonatali/tools": ">=0.4"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "^9"
