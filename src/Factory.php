@@ -230,7 +230,14 @@ class Factory implements InstallInterface
                     $content .= 'After=' . $service['exec-only-after'] . PHP_EOL; // network.target
 
                 $content .= PHP_EOL . '[Service]' . PHP_EOL;
-                $content .= 'ExecStart=' . $this->pbin . '/' . $service['bin'] . 
+
+                /**
+                 * In testing 
+                */
+                $execPath = \realpath($this->pbin);
+                if (!$execPath)
+                    $execPath = $this->pbin;
+                $content .= 'ExecStart=' . $execPath . '/' . $service['bin'] . 
                     (isset($service['control-by-pid']) && $service['control-by-pid']  ? 
                         ' & echo $! > /var/run/' . $service['name'] . '.pid' : '') . PHP_EOL;
                 //$content .= 'Alias=' . $serviceName . PHP_EOL;
