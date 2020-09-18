@@ -146,7 +146,7 @@ $ Installing from: /opt/myapp/vendor/vendor-name/rep-name/installation
 ```
 
 ## Use pid file
-Could be configured to use a pid file to control service. 
+Could be configured to use a pid file to control service.  
 For this, place an "control-by-pid" in service config:
 ```json
 "service" : [
@@ -160,7 +160,7 @@ For this, place an "control-by-pid" in service config:
 An pid file is created in \var\run\MyApp.pid when start and removed when stops.
 
 ## Kill child process
-Seting "kill-child" to false will make systemd to let all child of the main process alive on stop / restart. 
+Seting "kill-child" to false will make systemd to let all child of the main process alive on stop / restart.  
 For this, place an "kill-child" in service config:
 ```json
 "service" : [
