@@ -237,10 +237,16 @@ class Factory implements InstallInterface
                 $execPath = \realpath($this->pbin);
                 if (!$execPath)
                     $execPath = $this->pbin;
+                /**
+                 * End
+                */
                 $content .= 'ExecStart=' . $execPath . '/' . $service['bin'] . 
                     (isset($service['control-by-pid']) && $service['control-by-pid']  ? 
                         ' & echo $! > /var/run/' . $service['name'] . '.pid' : '') . PHP_EOL;
-                //$content .= 'Alias=' . $serviceName . PHP_EOL;
+                
+                // Do not kill child process on stop / restart service
+                if (isset($service['kill-child']) && $service['kill-child'] === false)
+                    $content .= 'KillMode=process' . PHP_EOL;
 
                 if (isset($service['control-by-pid']) && $service['control-by-pid'])
                     $content .= 'PIDFile=/var/run/' . $service['name'] . '.pid' . PHP_EOL;

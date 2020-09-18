@@ -11,6 +11,7 @@ Provide installation capability to a repository.
 * [Executable program](#executable-program) 
 * [Post install script](#post-install-script)
 * [Use pid file](#use-pid-file)
+* [Kill child process](#kill-child-process)
 * [Require app](#require-app)
 * [Install](#install)
 * [License](#license)
@@ -157,6 +158,20 @@ For this, place an "control-by-pid" in service config:
     ]
 ```
 An pid file is created in \var\run\MyApp.pid when start and removed when stops.
+
+## Kill child process
+Seting "kill-child" to false will make systemd to let all child of the main process alive on stop / restart. 
+For this, place an "kill-child" in service config:
+```json
+"service" : [
+        {
+            "name" : "MyApp",
+            "bin" : "my_app_executable",
+            "kill-child" : false
+        }
+    ]
+```
+Remember to manually kill all remaining process to prevent system mem overflow.
 
 ## Require app
 With "require" set in your config.json you could set which app your application depends.  
