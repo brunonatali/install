@@ -19,6 +19,9 @@ Provide installation capability to a repository.
 
 ## Before start
 Before you begin, consider reviewing your code and understanding that this is a tool for automating the installation of an application made in PHP to run on the CLI or as a service in a Linux environment.  
+  
+Observe that if service was instaled this component will update .service file and perform a daemon-reload, and if is active (runing) before install starts, service will be autoatically started after instalation is finished.  
+
 Note. Not supported on Windows.
 
 ### Folder structure
@@ -41,8 +44,6 @@ Note. If you are unsure how to create your 'my_program_executable' go to [Execut
 ## Quickstart example
 ### Individual
 A common use is the individual installation of the application, for that, consider having the folder structure as shown in `Folder structure`.
-
-Before continue observe that if service was instaled this component will update .service file and perform a daemon-reload, and if is active (runing) before install starts, service will be autoatically started after instalation is finished.
 
 - Let's create a simple configuration file, "installation / install-instructions.json": 
 
