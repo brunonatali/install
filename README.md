@@ -11,6 +11,7 @@ Provide installation capability to a repository.
 * [Executable program](#executable-program) 
 * [Post install script](#post-install-script)
 * [Use pid file](#use-pid-file)
+* [Restart on failure](#restart-on-failure)
 * [Kill child process](#kill-child-process)
 * [Require app](#require-app)
 * [Install](#install)
@@ -41,6 +42,8 @@ Note. If you are unsure how to create your 'my_program_executable' go to [Execut
 ### Individual
 A common use is the individual installation of the application, for that, consider having the folder structure as shown in `Folder structure`.
 
+Before continue observe that if service was instaled this component will update .service file and perform a daemon-reload, and if is active (runing) before install starts, service will be autoatically started after instalation is finished.
+
 - Let's create a simple configuration file, "installation / install-instructions.json": 
 
 ```json
@@ -52,7 +55,8 @@ A common use is the individual installation of the application, for that, consid
         {
             "name" : "My1stProgram",
             "bin" : "my_program_executable",
-            "control-by-pid" : true
+            "control-by-pid" : true,
+            "restart-on-abort" : true
         }
     ],
     "require" : [
@@ -158,6 +162,19 @@ For this, place an "control-by-pid" in service config:
     ]
 ```
 An pid file is created in \var\run\MyApp.pid when start and removed when stops.
+
+## Restart on failure
+Systemd could restart service if service fails.  
+For this, place an "restart-on-abort" in service config:
+```json
+"service" : [
+        {
+            "name" : "MyApp",
+            "bin" : "my_app_executable",
+            "restart-on-abort" : true
+        }
+    ]
+```
 
 ## Kill child process
 Seting "kill-child" to false will make systemd to let all child of the main process alive on stop / restart.  

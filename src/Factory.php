@@ -211,13 +211,45 @@ class Factory implements InstallInterface
 
                 $out = [];
                 $result = 0;
+                $serviceExists = false;
+                $serviceIsRunning = false;
 
-                // Remove old service before install new
-                $this->run('systemctl stop ' . $serviceName, $out);
+                /**
+                 * Remove old service before install new
+                 * */ 
+
+                if ($this->run("systemctl is-active --quiet $serviceName", $out) === 0) {
+                    $this->outSystem->stdout("\t  Stopping service before continue: ", false, OutSystem::LEVEL_NOTICE);
+                    if ($this->run('systemctl stop ' . $serviceName, $out) !== 0)
+                        $this->outSystem->stdout("[WARNING] Service $serviceName could not be stoped", OutSystem::LEVEL_NOTICE);
+                    else
+                        $this->outSystem->stdout("OK", OutSystem::LEVEL_NOTICE);
+                        
+                    $serviceIsRunning = true;
+                    $serviceExists = true;
+                }
+
+                /**
+                 * Check if service is at least registered
+                 * 4 mean "Unit service-name.service could not be found."
+                */
+                if (!$serviceExists && $this->run('systemctl status ' . $serviceName, $out) !== 4) 
+                    $serviceExists = true;
+
+                /******* REMOVING ---> check needance & permanent remove on next version
                 $this->run('systemctl disable ' . $serviceName, $out);
                 $this->run('rm /etc/systemd/system/' . $serviceName, $out);
                 $this->run('systemctl daemon-reload', $out);
                 $this->run('systemctl reset-failed', $out);
+                *****/
+
+                $this->run('uname -r', $out);
+                $linuxVersion = \floatval((string) implode("", $out));
+
+                if ($linuxVersion >= 5) 
+                    $runPath = '/run/';
+                else 
+                    $runPath = '/var/run/';
 
                 $content = '[Unit]' . PHP_EOL;
                 
@@ -229,41 +261,54 @@ class Factory implements InstallInterface
                 if (isset($service['exec-only-after']))
                     $content .= 'After=' . $service['exec-only-after'] . PHP_EOL; // network.target
 
-                $content .= PHP_EOL . '[Service]' . PHP_EOL;
+                $content .= PHP_EOL . '[Install]' . PHP_EOL;
+                $content .= 'WantedBy=multi-user.target' . PHP_EOL;
 
-                /**
-                 * In testing 
-                */
+                $content .= PHP_EOL . '[Service]' . PHP_EOL;
+                
                 $execPath = \realpath($this->pbin);
                 if (!$execPath)
                     $execPath = $this->pbin;
-                /**
-                 * End
-                */
+                    
                 $content .= 'ExecStart=' . $execPath . '/' . $service['bin'] . 
                     (isset($service['control-by-pid']) && $service['control-by-pid']  ? 
-                        ' & echo $! > /var/run/' . $service['name'] . '.pid' : '') . PHP_EOL;
+                        " & echo $! > $runPath" . $service['name'] . '.pid' : '') . PHP_EOL;
                 
                 // Do not kill child process on stop / restart service
                 if (isset($service['kill-child']) && $service['kill-child'] === false)
                     $content .= 'KillMode=process' . PHP_EOL;
 
                 if (isset($service['control-by-pid']) && $service['control-by-pid'])
-                    $content .= 'PIDFile=/var/run/' . $service['name'] . '.pid' . PHP_EOL;
+                    $content .= "PIDFile=$runPath" . $service['name'] . '.pid' . PHP_EOL;
 
-                $content .= PHP_EOL . '[Install]' . PHP_EOL;
-                $content .= 'WantedBy=multi-user.target' . PHP_EOL;
-                //$content .= 'KillSignal=SIGTERM' . PHP_EOL;
-                //$content .= 'SendSIGKILL=no' . PHP_EOL; // Don't want to see an automated SIGKILL ever
+                $content .= 'KillSignal=SIGTERM' . PHP_EOL;
+                $content .= 'SendSIGKILL=no' . PHP_EOL;
 
-                //$content .= 'Restart=on-abort' . PHP_EOL;
-                //$content .= 'RestartSec=5s' . PHP_EOL;
+                if (isset($service['restart-on-abort']) && $service['restart-on-abort']) {
+                    $content .= 'Restart=on-abort' . PHP_EOL;
+                    $content .= 'RestartSec=5s' . PHP_EOL;
+                }
 
                 $serviceFile = '/etc/systemd/system/' . $serviceName;
+
+                if (\file_exists($serviceFile))
+                    @\unlink($serviceFile);
+
                 if (!\file_put_contents($serviceFile, $content) ||
                     !\chmod($serviceFile, 0644) ||
-                    $this->run('systemctl enable ' . $serviceName, $out) !== 0) 
+                    $this->run(
+                        ($serviceExists ? 'systemctl daemon-reload' : 'systemctl enable ' . $serviceName), 
+                        $out
+                    ) !== 0) 
                         throw new \Exception("Error while creating service '$serviceName'", 1);
+
+                if ($serviceIsRunning) {
+                    $this->outSystem->stdout("\t  Automatically start service: ", false, OutSystem::LEVEL_NOTICE);
+                    if ($this->run('systemctl start ' . $serviceName, $out) !== 0)
+                        $this->outSystem->stdout('Fail', OutSystem::LEVEL_NOTICE);
+                    else
+                        $this->outSystem->stdout('OK', OutSystem::LEVEL_NOTICE);
+                }
 
                 $result = 'Done.';
             }
