@@ -11,6 +11,7 @@ Provide installation capability to a repository.
 * [Executable program](#executable-program) 
 * [Post install script](#post-install-script)
 * [Use pid file](#use-pid-file)
+* [Select shell to use](#select-shell-to-use)
 * [Restart on failure](#restart-on-failure)
 * [Kill child process](#kill-child-process)
 * [Require app](#require-app)
@@ -163,6 +164,19 @@ For this, place an "control-by-pid" in service config:
     ]
 ```
 An pid file is created in \var\run\MyApp.pid when start and removed when stops.
+
+## Select shell to use
+To help service load / run using all configs, linux shell is called on execution and "sh" is used for default.  
+Just one config is allowed, to change this, place an "shell" in service config with "bash":
+```json
+"service" : [
+        {
+            "name" : "MyApp",
+            "bin" : "my_app_executable",
+            "shell" : "bash"
+        }
+    ]
+```
 
 ## Restart on failure
 Systemd could restart service if service fails.  

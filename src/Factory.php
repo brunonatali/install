@@ -256,10 +256,12 @@ class Factory implements InstallInterface
                 if (isset($service['description']))
                     $content .= 'Description=' . $service['description'] . PHP_EOL;
                 else
-                    $content .= 'Description=Automation service for ' . $service['name'] . PHP_EOL;
+                    $content .= 'Description=Automation service created using BrunoNatali/Install PHP lib' . PHP_EOL;
                     
                 if (isset($service['exec-only-after']))
                     $content .= 'After=' . $service['exec-only-after'] . PHP_EOL; // network.target
+
+                $content .= 'Documentation=https://github.com/brunonatali/install';
 
                 $content .= PHP_EOL . '[Install]' . PHP_EOL;
                 $content .= 'WantedBy=multi-user.target' . PHP_EOL;
@@ -269,10 +271,27 @@ class Factory implements InstallInterface
                 $execPath = \realpath($this->pbin);
                 if (!$execPath)
                     $execPath = $this->pbin;
+
+                $useShell = (isset($service['shell']) && \trim($service['shell']) === 'bash' ?
+                    'bash' : 'sh');
+
+                if (\file_exists('/bin/' . $useShell))
+                    $useShell = "/bin/$useShell";
+                else if (\file_exists('/sbin/' . $useShell))
+                    $useShell = "/sbin/$useShell";
+                else if (\file_exists('/usr/bin/' . $useShell))
+                    $useShell = "/usr/bin/$useShell";
+                else if (\file_exists('/usr/sbin/' . $useShell))
+                    $useShell = "/usr/sbin/$useShell";
+                else 
+                    throw new \Exception(
+                        "Could not find configured shell ($useShell) in your system", 
+                        self::INSTALL_SERVICE_CONFIG_ERROR
+                    );
                     
-                $content .= 'ExecStart=' . $execPath . '/' . $service['bin'] . 
+                $content .= "ExecStart=$useShell -c '$execPath/" . \trim($service['bin']) . 
                     (isset($service['control-by-pid']) && $service['control-by-pid']  ? 
-                        " & echo $! > $runPath" . $service['name'] . '.pid' : '') . PHP_EOL;
+                        " & echo $! > $runPath" . $service['name'] . '.pid\'' : '\'') . PHP_EOL;
                 
                 // Do not kill child process on stop / restart service
                 if (isset($service['kill-child']) && $service['kill-child'] === false)
