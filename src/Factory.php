@@ -261,7 +261,7 @@ class Factory implements InstallInterface
                 if (isset($service['exec-only-after']))
                     $content .= 'After=' . $service['exec-only-after'] . PHP_EOL; // network.target
 
-                $content .= 'Documentation=https://github.com/brunonatali/install';
+                $content .= 'Documentation=https://github.com/brunonatali/install' . PHP_EOL;
 
                 $content .= PHP_EOL . '[Install]' . PHP_EOL;
                 $content .= 'WantedBy=multi-user.target' . PHP_EOL;
