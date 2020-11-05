@@ -256,7 +256,8 @@ class Factory implements InstallInterface
                 if (isset($service['description']))
                     $content .= 'Description=' . $service['description'] . PHP_EOL;
                 else
-                    $content .= 'Description=Automation service created using BrunoNatali/Install PHP lib' . PHP_EOL;
+                    $content .= "Description=Automation service for $serviceName (" . 
+                        $service['name'] . ") created using BrunoNatali/Install PHP lib" . PHP_EOL;
                     
                 if (isset($service['exec-only-after']))
                     $content .= 'After=' . $service['exec-only-after'] . PHP_EOL; // network.target
