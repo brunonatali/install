@@ -259,6 +259,9 @@ class Factory implements InstallInterface
                     $content .= "Description=Automation service for $serviceName (" . 
                         $service['name'] . ") created using BrunoNatali/Install PHP lib" . PHP_EOL;
                     
+                if (isset($service['require-service']))
+                    $content .= 'Requires=' . $service['require-service'] . PHP_EOL; // mysql.service
+            
                 if (isset($service['exec-only-after']))
                     $content .= 'After=' . $service['exec-only-after'] . PHP_EOL; // network.target
 

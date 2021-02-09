@@ -15,6 +15,8 @@ Provide installation capability to a repository.
 * [Restart on failure](#restart-on-failure)
 * [Kill child process](#kill-child-process)
 * [Require app](#require-app)
+* [Require service](#require-service)
+* [After service](#after-service)
 * [Install](#install)
 * [License](#license)
 
@@ -251,6 +253,30 @@ $myApp->install( array(
 ));
 ```
 Note 2. In the above example, don't matther what is the value of require-installed item (*EXCEPT FOR 'force' that is reserved internally), just need to be registered as a key.
+
+## Require service
+Configures systemd.unit 'Requires' to defined service
+```json
+{
+    "service" : [
+        {
+            "require-service" : "require-this.service"
+        }
+    ]
+}
+```
+
+## After service
+Configures systemd.unit 'After' specific service
+```json
+{
+    "service" : [
+        {
+            "exec-only-after" : "after-this.service"
+        }
+    ]
+}
+```
 
 ## Install
 
